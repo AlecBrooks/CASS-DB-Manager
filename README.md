@@ -14,9 +14,12 @@ Repository Contents
 Downloading the Repository
 
 Clone the repository using Git:
-
+```
 git clone https://github.com/AlecBrooks/CASS-DB-Manager.git
+```
+Downloading as a ZIP:
 
+Alternatively, you can download the repository as a ZIP file directly from GitHub. Click the green 'Code' button on the repository page and select Download ZIP.
 ⸻
 
 License
