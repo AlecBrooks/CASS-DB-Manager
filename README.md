@@ -5,9 +5,9 @@ CASS DB Manager is a Python-based tool for storing, managing, and analyzing raw 
 ---
 
 Repository Contents
-	•	run.py: Main script for setting up the virtual environment and launching the application.
-	•	Configuration Files: Pre-configured settings for database setup and analysis.
-	•	Documentation: Additional guides and documentation are provided within the repository.
+- run.py: Main script for setting up the virtual environment and launching the application.
+- Configuration Files: Pre-configured settings for database setup and analysis.
+- Documentation: Additional guides and documentation are provided within the repository.
 
 ---
 
