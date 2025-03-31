@@ -1,0 +1,13 @@
+mysql-connector-python
+pandas
+tqdm
+tabulate
+colorama
+simple-term-menu
+openpyxl
+numpy
+psutil
+Pillow
+customtkinter
+tkcalendar
+matplotlib
