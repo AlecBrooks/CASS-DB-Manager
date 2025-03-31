@@ -1,0 +1,184 @@
+# ==============================
+# Project-Specific Files & Folders
+# ==============================
+
+data/CassOutput/*
+data/audits/*
+
+# ==============================
+# OS-Specific Files
+# ==============================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+.DS_Store?
+.fseventsd
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# ==============================
+# C++ (Build Artifacts)
+# ==============================
+*.exe
+*.dll
+*.obj
+*.o
+*.so
+*.a
+*.lib
+*.out
+*.elf
+*.d
+*.exp
+*.i
+*.s
+*.lst
+*.map
+*.res
+*.tds
+*.gch
+*.swp
+*.swo
+*.dep
+*.pch
+*.bin
+*.dSYM/
+*.ipch
+*.ilk
+*.pdb
+*.tlog
+*.log
+*.cache
+*.ncb
+*.sbr
+*.opendb
+
+# ==============================
+# Python
+# ==============================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+*.whl
+venv/
+env/
+.venv/
+.env/
+pip-log.txt
+pip-delete-this-directory.txt
+build/
+dist/
+*.egg-info/
+.eggs/
+*.manifest
+*.spec
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# ==============================
+# R
+# ==============================
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+.Rapp.history
+.Rprofile
+*.RData
+*.Rds
+*.rdb
+*.rds
+*.Rproj
+*.Rhistory
+.Rout
+.Rout.save
+.RDataTmp
+
+# Packrat (R package manager)
+packrat/
+packrat.lock
+
+# Renviron
+Renviron.site
+Renviron
+
+# ShinyApps logs
+rsconnect/
+shinyapps/
+
+# ==============================
+# SQL
+# ==============================
+*.sql-journal
+*.sqlite-journal
+*.sqlite
+*.db
+
+# ==============================
+# Sublime
+# ==============================
+
+./sublime
+
+# ==============================
+# Visual Studio (Including Subfolders)
+# ==============================
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln
+*.dbmdl
+*.VC.db
+*.VC.VC.opendb
+*.opensdf
+*.sdf
+*.ilk
+*.ipch
+*.iobj
+*.obj
+*.pch
+*.pdb
+*.tlog
+*.log
+*.cache
+*.ncb
+*.sbr
+*.opendb
+*.rsuser
+*.sln.docstates
+*.csproj.user
+*.code-workspace
+.vsconfig
+
+# ==============================
+# Logs, Temporary, and Cache Files
+# ==============================
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*.swn
+*.lock
+*.~*
+*.crt
+*.pem
+*.key
+*.cfg
+*.ini
