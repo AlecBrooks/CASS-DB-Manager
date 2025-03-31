@@ -2,8 +2,8 @@
 # Project-Specific Files & Folders
 # ==============================
 
-data/CassOutput/*
-data/audits/*
+data/*
+venv
 
 # ==============================
 # OS-Specific Files
