@@ -12,12 +12,30 @@ MAIN_SCRIPT = os.path.join("scripts", "main.py")
 VENV_FOLDER = "venv"  # Virtual environment folder name
 REQUIREMENTS_FILE = "requirements.txt"
 
+# Folder structure to ensure
+REQUIRED_FOLDERS = [
+    "data/audits",
+    "data/CassOutput",
+    "data/rawData/AE33",
+    "data/rawData/TCA",
+    "data/SQLLite",
+]
+
 def main():
+    ensure_data_folders_exist()
     create_venv_if_needed()
     venv_python = get_venv_python()
     upgrade_pip(venv_python)
     install_requirements(venv_python)
     run_main_script(venv_python)
+
+def ensure_data_folders_exist():
+    for folder in REQUIRED_FOLDERS:
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+            print(f"[INFO] Created missing folder: {folder}")
+        else:
+            print(f"[INFO] Folder already exists: {folder}")
 
 def create_venv_if_needed():
     if not os.path.exists(VENV_FOLDER):
