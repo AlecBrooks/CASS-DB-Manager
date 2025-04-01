@@ -6,3 +6,4 @@ tabulate
 tqdm
 colorama
 simple-term-menu
+openpyxl
