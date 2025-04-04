@@ -4,9 +4,7 @@ import os
 import sys
 import subprocess
 import platform
-import runpy
 import sqlite3
-import pandas as pd
 from colorama import init, Fore, Style
 init(autoreset=True)
 
@@ -38,27 +36,23 @@ def check_db_connection():
                     key, value = line.split('=', 1)
                     db_config[key.strip()] = value.strip()
 
-        # Ensure dbPath is explicitly defined
         if 'dbPath' not in db_config:
-            print(Fore.RED + "Error: 'dbPath' not found in db.conf." + Style.RESET_ALL)
-            return False
+            return False, "Missing"
 
         db_path = db_config['dbPath']
 
-        # Check if file exists
         if not os.path.isfile(db_path):
-            print(Fore.RED + f"Error: Database file not found at path: {db_path}" + Style.RESET_ALL)
-            return False
+            return False, os.path.splitext(os.path.basename(db_path))[0]
 
-        # Attempt to open the database
         conn = sqlite3.connect(db_path)
         conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
         conn.close()
-        return True
 
-    except Exception as e:
-        print(Fore.RED + f"Database connection error: {e}" + Style.RESET_ALL)
-        return False
+        db_name = os.path.splitext(os.path.basename(db_path))[0]
+        return True, db_name
+
+    except Exception:
+        return False, "Unknown"
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -86,8 +80,14 @@ def clear_screen():
     command = "cls" if os.name == "nt" else "clear"
     os.system(command)
 
-def print_header():
-    header = f"""
+def print_header(menu_state, db_status, db_name):
+    menu_label = f"Menu: {Fore.GREEN}{menu_state}{Style.RESET_ALL}"
+    status_text = f"{Fore.GREEN}Connected{Style.RESET_ALL}" if db_status else f"{Fore.RED}No Connection{Style.RESET_ALL}"
+    status_line = f"Database: {db_name} | Status: {status_text}"
+    branding = f"{Fore.YELLOW}CASS Database Manager - UNLV{Style.RESET_ALL}"
+    right_aligned_branding = branding.rjust(90)  # Align to the right edge of 90-character width
+
+    print(f"""{Fore.CYAN}
 ==========================================================================================
    _____           _____ _____   _____  ____    __  __                                   
   / ____|   /\\    / ____/ ____| |  __ \\|  _ \\  |  \\/  |                                  
@@ -97,17 +97,14 @@ def print_header():
   \\_____/_/    \\_\\_____/_____/  |_____/|____/  |_|  |_|\\__,_|_| |_|\\__,_|\\__, |\\___|_|   
                                                                           __/ |          
                                                                          |___/    
-Menu: {menu_state}
-                                                           CASS Database Manager - UNLV
-==========================================================================================
-    """
-    print(Fore.CYAN + header + Style.RESET_ALL)
+{Style.RESET_ALL}{menu_label}
+{status_line}
+{right_aligned_branding}
+{Fore.CYAN}==========================================================================================
+{Style.RESET_ALL}""")
 
 def print_footer():
-    footer = """
-==========================================================================================
-    """
-    print(Fore.CYAN + footer + Style.RESET_ALL)
+    print(f"{Fore.CYAN}" + "=" * 100 + f"{Style.RESET_ALL}")
 
 def get_menu_choice(options):
     if platform.system() == "Windows":
@@ -128,8 +125,9 @@ def get_menu_choice(options):
         return terminal_menu.show()
 
 while not exitFile:
+    db_status, db_name = check_db_connection()
     clear_screen()
-    print_header()
+    print_header(menu_state, db_status, db_name)
 
     if menu_state == CONNECTED_MENU:
         options = [" - Analysis", " - Upload Data", " - Audit", " - Configuration", " - Exit"]
@@ -184,26 +182,22 @@ while not exitFile:
             menu_state = CONNECTED_MENU
 
     elif menu_state == AUDIT_MENU:
-        if menu_entry_index == 0:  # AE33 Time Gaps
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            audit_script = os.path.join(script_dir, "audit.py")
-            subprocess.run([sys.executable, audit_script, "ae33"])
-        elif menu_entry_index == 1:  # TCA Time Gaps
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            audit_script = os.path.join(script_dir, "audit.py")
-            subprocess.run([sys.executable, audit_script, "tca"])
-        elif menu_entry_index == 2:  # Audits Folder
+        if menu_entry_index == 0:
+            subprocess.run([sys.executable, "audit.py", "ae33"])
+        elif menu_entry_index == 1:
+            subprocess.run([sys.executable, "audit.py", "tca"])
+        elif menu_entry_index == 2:
             open_folder(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "audits")))
-        elif menu_entry_index == 3:  # Back
+        elif menu_entry_index == 3:
             menu_state = CONNECTED_MENU
 
     elif menu_state == CONFIG_MENU:
         if menu_entry_index == 0:
-            result = check_db_connection()
+            result, name = check_db_connection()
             if result:
                 print(Fore.GREEN + "Connection successful!" + Style.RESET_ALL)
             else:
-                print(Fore.RED + "Connection failed. Press Enter to continue." + Style.RESET_ALL)
+                print(Fore.RED + "Connection failed." + Style.RESET_ALL)
             input("Please press Enter.")
         elif menu_entry_index == 1:
             open_file_with_default_editor(os.path.join(os.path.dirname(__file__), "..", "conf", "data.conf"))

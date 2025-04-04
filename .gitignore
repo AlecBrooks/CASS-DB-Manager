@@ -13,13 +13,13 @@ venv
 .AppleDouble
 .LSOverride
 Icon?
-.command
+*.command
 ._*
 .Spotlight-V100
 .Trashes
 .DS_Store?
 .fseventsd
-.sh
+*.sh
 
 # Windows
 Thumbs.db
@@ -27,7 +27,7 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 *.lnk
-.bat
+*.bat
 
 # ==============================
 # C++ (Build Artifacts)
