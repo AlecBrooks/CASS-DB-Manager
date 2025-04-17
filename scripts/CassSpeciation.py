@@ -273,21 +273,21 @@ WITH t AS (
       AVG(EC)        AS avg_EC,
       AVG(OC)        AS avg_OC,
       AVG(AE33_BC6)  AS avg_AE33_BC6
-   FROM {self.tca_table}
+   FROM TCA_raw
    WHERE StartTimeLocal >= '{start_.strftime("%Y-%m-%d")}'
      AND StartTimeLocal <  '{(end_ + timedelta(days=1)).strftime("%Y-%m-%d")}'
    GROUP BY bucket
 ), a AS (
-   SELECT 
+   SELECT
       datetime((CAST(strftime('%s', datetime(date || ' ' || time)) AS INTEGER) / {interval}) * {interval}, 'unixepoch') as bucket,
-      AVG(BC1) AS avg_BC1, 
-      AVG(BC2) AS avg_BC2, 
-      AVG(BC3) AS avg_BC3, 
-      AVG(BC4) AS avg_BC4, 
-      AVG(BC5) AS avg_BC5, 
-      AVG(BC6) AS avg_BC6, 
+      AVG(BC1) AS avg_BC1,
+      AVG(BC2) AS avg_BC2,
+      AVG(BC3) AS avg_BC3,
+      AVG(BC4) AS avg_BC4,
+      AVG(BC5) AS avg_BC5,
+      AVG(BC6) AS avg_BC6,
       AVG(BC7) AS avg_BC7
-   FROM {self.ae33_table}
+   FROM AE33_raw
    WHERE date >= '{start_.strftime("%Y-%m-%d")}'
      AND date <  '{(end_ + timedelta(days=1)).strftime("%Y-%m-%d")}'
    GROUP BY bucket
@@ -314,7 +314,8 @@ FROM buckets b
 LEFT JOIN t ON b.bucket = t.bucket
 LEFT JOIN a ON b.bucket = a.bucket
 ORDER BY b.bucket;
-"""
+    """
+
         cnx = sqlite3.connect(self.db_path)
         df = pd.read_sql_query(sql, cnx)
         cnx.close()
@@ -591,6 +592,7 @@ ORDER BY b.bucket;
         logging.info(f"Wrote constants sheet to {self.output_xlsx}")
 
     def produce_main_plots(self, output_prefix: str):
+
         if self.TCA_AE_hourly.empty:
             logging.warning("No data available to produce main plots.")
             return
@@ -598,16 +600,19 @@ ORDER BY b.bucket;
         if not pd.api.types.is_datetime64_any_dtype(self.TCA_AE_hourly['Date_and_Time']):
             self.TCA_AE_hourly['Date_and_Time'] = pd.to_datetime(self.TCA_AE_hourly['Date_and_Time'])
 
+        # Existing time-series plot for BC-ff, BC-bb, and TC
         valid_df_ff = self.TCA_AE_hourly[self.TCA_AE_hourly['BC-ff'] != -99][['Date_and_Time', 'BC-ff']].dropna()
         valid_df_bb = self.TCA_AE_hourly[self.TCA_AE_hourly['BC-bb'] != -99][['Date_and_Time', 'BC-bb']].dropna()
+        valid_df_tc = self.TCA_AE_hourly[self.TCA_AE_hourly['TCconc'] != -99][['Date_and_Time', 'TCconc']].dropna()
 
-        logging.info("Generating time-series (monthly summary) plot for BC-ff and BC-bb.")
+        logging.info("Generating time-series (monthly summary) plot for BC-ff, BC-bb, and TC.")
         plt.figure(figsize=(12, 5))
         plt.plot(valid_df_ff['Date_and_Time'], valid_df_ff['BC-ff'], linestyle='-', alpha=0.7, label='BC-ff')
         plt.plot(valid_df_bb['Date_and_Time'], valid_df_bb['BC-bb'], linestyle='-', alpha=0.7, label='BC-bb')
+        plt.plot(valid_df_tc['Date_and_Time'], valid_df_tc['TCconc'], linestyle='-', alpha=0.7, label='Total Carbon (TC)')  # Add TC line
         plt.xlabel("Date")
-        plt.ylabel("BC (ng/m³)")
-        plt.title(f"Monthly Summary: BC-ff & BC-bb\n{self.start_date.date()} to {self.end_date.date()}")
+        plt.ylabel("BC/TC (ng/m³)")
+        plt.title(f"Monthly Summary: BC-ff, BC-bb, and TC\n{self.start_date.date()} to {self.end_date.date()}")
         plt.grid(True)
         plt.legend()
         ax = plt.gca()
@@ -615,15 +620,39 @@ ORDER BY b.bucket;
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %Y"))
         plt.xticks(rotation=45)
         plt.tight_layout()
-        ts_plot_path = os.path.join(self.plot_dir, f"{output_prefix}_BCff_BCbb_{self.start_date.date()}_{self.end_date.date()}.png")
+        ts_plot_path = os.path.join(self.plot_dir, f"{output_prefix}_BCff_BCbb_TC_{self.start_date.date()}_{self.end_date.date()}.png")
         plt.savefig(ts_plot_path)
         plt.close()
         logging.info(f"Saved time-series plot: {ts_plot_path}")
 
-        logging.info("Generating diurnal (24-hour) plot for BC-ff and BC-bb.")
+        # New time-series plot for TC, BC6, and BC-FF
+        valid_df_bc6 = self.TCA_AE_hourly[self.TCA_AE_hourly['AE33_BC6'] != -99][['Date_and_Time', 'AE33_BC6']].dropna()
+
+        logging.info("Generating time-series plot for Total Carbon (TC), BC6, and BC-ff.")
+        plt.figure(figsize=(12, 5))
+        plt.plot(valid_df_tc['Date_and_Time'], valid_df_tc['TCconc'], linestyle='-', alpha=0.7, label='Total Carbon (TC)')
+        plt.plot(valid_df_bc6['Date_and_Time'], valid_df_bc6['AE33_BC6'], linestyle='-', alpha=0.7, label='BC6')
+        plt.plot(valid_df_ff['Date_and_Time'], valid_df_ff['BC-ff'], linestyle='-', alpha=0.7, label='BC-ff')  # Add BC-ff line
+        plt.xlabel("Date")
+        plt.ylabel("BC/TC (ng/m³)")
+        plt.title(f"Time-Series: Total Carbon (TC), BC6, and BC-ff\n{self.start_date.date()} to {self.end_date.date()}")
+        plt.grid(True)
+        plt.legend()
+        ax = plt.gca()
+        ax.xaxis.set_major_locator(mdates.MonthLocator())
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %Y"))
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        new_ts_plot_path = os.path.join(self.plot_dir, f"{output_prefix}_TC_BC6_BCff_{self.start_date.date()}_{self.end_date.date()}.png")
+        plt.savefig(new_ts_plot_path)
+        plt.close()
+        logging.info(f"Saved new time-series plot: {new_ts_plot_path}")
+
+        # Existing diurnal plot for BC-ff, BC-bb, and TC
+        logging.info("Generating diurnal (24-hour) plot for BC-ff, BC-bb, and TC.")
         df_diurnal = self.TCA_AE_hourly.copy()
         df_diurnal['Hour'] = df_diurnal['Date_and_Time'].dt.hour
-        df_diurnal = df_diurnal[(df_diurnal['BC-ff'] != -99) & (df_diurnal['BC-bb'] != -99)]
+        df_diurnal = df_diurnal[(df_diurnal['BC-ff'] != -99) & (df_diurnal['BC-bb'] != -99) & (df_diurnal['TCconc'] != -99)]  # Include TC
         if df_diurnal.empty:
             logging.warning("No valid data for diurnal plot.")
             return
@@ -632,7 +661,9 @@ ORDER BY b.bucket;
             BCff_mean=('BC-ff', 'mean'),
             BCff_std=('BC-ff', 'std'),
             BCbb_mean=('BC-bb', 'mean'),
-            BCbb_std=('BC-bb', 'std')
+            BCbb_std=('BC-bb', 'std'),
+            TC_mean=('TCconc', 'mean'),  # Add TC mean
+            TC_std=('TCconc', 'std')     # Add TC std
         ).reset_index()
 
         plt.figure(figsize=(10, 5))
@@ -646,14 +677,19 @@ ORDER BY b.bucket;
                          diurnal_stats['BCbb_mean'] - diurnal_stats['BCbb_std'],
                          diurnal_stats['BCbb_mean'] + diurnal_stats['BCbb_std'],
                          alpha=0.2)
+        plt.plot(diurnal_stats['Hour'], diurnal_stats['TC_mean'], '-', label='Total Carbon (TC) Mean')  # Add TC line
+        plt.fill_between(diurnal_stats['Hour'],
+                         diurnal_stats['TC_mean'] - diurnal_stats['TC_std'],
+                         diurnal_stats['TC_mean'] + diurnal_stats['TC_std'],
+                         alpha=0.2)  # Add TC std shading
         plt.xlabel("Hour of Day")
-        plt.ylabel("BC (ng/m³)")
-        plt.title(f"Diurnal Plot: BC-ff & BC-bb\n{self.start_date.date()} to {self.end_date.date()}")
-        plt.xticks(range(0,24))
+        plt.ylabel("BC/TC (ng/m³)")
+        plt.title(f"Diurnal Plot: BC-ff, BC-bb, and TC\n{self.start_date.date()} to {self.end_date.date()}")
+        plt.xticks(range(0, 24))
         plt.grid(True)
         plt.legend()
         plt.tight_layout()
-        diurnal_plot_path = os.path.join(self.plot_dir, f"{output_prefix}_Diurnal_{self.start_date.date()}_{self.end_date.date()}.png")
+        diurnal_plot_path = os.path.join(self.plot_dir, f"{output_prefix}_Diurnal_BCff_BCbb_TC_{self.start_date.date()}_{self.end_date.date()}.png")
         plt.savefig(diurnal_plot_path)
         plt.close()
         logging.info(f"Saved diurnal plot: {diurnal_plot_path}")
