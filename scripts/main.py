@@ -138,7 +138,7 @@ while not exitFile:
     elif menu_state == ANALYSIS_MENU:
         options = [" - Run Analysis", " - Update Constants", " - Folder", " - Back"]
     elif menu_state == CONFIG_MENU:
-        options = [" - Test DB Connection", " - Data Config", " - DB Config", " - DB Install", " - Back"]
+        options = [" - Test DB Connection", " - Data Config", " - DB Config", " - DB Install", " - DB Folder", " - Back"]
 
     menu_entry_index = get_menu_choice(options)
     print_footer()
@@ -206,4 +206,6 @@ while not exitFile:
         elif menu_entry_index == 3:
             subprocess.run([sys.executable, "dbInstall.py"])
         elif menu_entry_index == 4:
+            open_folder(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "SQLite")))
+        elif menu_entry_index == 5:
             menu_state = CONNECTED_MENU
