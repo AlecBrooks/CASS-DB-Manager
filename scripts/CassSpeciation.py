@@ -352,7 +352,6 @@ ORDER BY b.bucket;
 
         df['B-abs-BC'] = df['B-abs6']*(470/880)**(-self.AAE_bc)
         df['B-abs-Brc'] = df['B-abs2'] - df['B-abs-BC']
-        df['BrC'] = df['POA_BrC'] - df['SOA_BrC']
 
         df['POC'] = df['OC'] - df['SOC']
         df['POA'] = df['POC'] * self.POA_POC_Ratio
@@ -363,6 +362,7 @@ ORDER BY b.bucket;
         df['SOA_BrC'] = df['BrC-abs-Sec']  / self.MAC_BrC_Sec
         df['POA_WtC'] = df['POA'] - df['POA_BrC']
         df['SOA_WtC'] = df['SOA'] - df['SOA_BrC']
+        df['BrC'] = df['POA_BrC'] + df['SOA_BrC']
 
         for idx, row in df.iterrows():
             if (row['B-abs7'] == -99) or (row['B-abs2'] == -99):
