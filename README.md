@@ -1,4 +1,4 @@
-# CASS DB Manager
+# CASS DB Manager v1.1
 
 CASS DB Manager is a Python-based tool for storing, managing, and analyzing raw data from AE33 Aethalometers. It enables real-time monitoring and detailed speciation of Aerosol Black Carbon for air quality research and environmental monitoring.
 

@@ -112,17 +112,15 @@ class CassSpeciation:
 
         root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         out_root_dir = os.path.join(root_dir, "data", "CASSOutput")
+        db_name = os.path.splitext(os.path.basename(self.db_path))[0]
         timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.run_dir = os.path.join(out_root_dir, timestamp_str)
+        self.run_dir = os.path.join(out_root_dir, f"{db_name}_{timestamp_str}")
         os.makedirs(self.run_dir, exist_ok=True)
-
         self.plot_dir = os.path.join(self.run_dir, "plots")
         os.makedirs(self.plot_dir, exist_ok=True)
-        
         self.rsquared_dir = os.path.join(self.run_dir, "RSquared")
         os.makedirs(self.rsquared_dir, exist_ok=True)
-
-        self.output_xlsx = os.path.join(self.run_dir, "CASSOutput.xlsx")
+        self.output_xlsx = os.path.join(self.run_dir, f"{db_name}_{timestamp_str}.xlsx")
 
     def run(self):
         logging.info("Starting CassSpeciation run.")
@@ -354,7 +352,7 @@ ORDER BY b.bucket;
 
         df['B-abs-BC'] = df['B-abs6']*(470/880)**(-self.AAE_bc)
         df['B-abs-Brc'] = df['B-abs2'] - df['B-abs-BC']
-        df['BrC'] = df['OC'] - df['AE33_BC6']
+        df['BrC'] = df['POA_BrC'] - df['SOA_BrC']
 
         df['POC'] = df['OC'] - df['SOC']
         df['POA'] = df['POC'] * self.POA_POC_Ratio
