@@ -18,7 +18,7 @@ REQUIRED_FOLDERS = [
     "data/CassOutput",
     "data/rawData/AE33",
     "data/rawData/TCA",
-    "data/SQLLite",
+    "data/SQLite",
 ]
 
 def main():

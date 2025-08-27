@@ -4,6 +4,7 @@
 
 data/*
 venv
+'DB CASS Manager.bat'
 
 # ==============================
 # OS-Specific Files
